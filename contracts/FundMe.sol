@@ -1,22 +1,73 @@
-//SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+//SPDX-License-Identifier: MIT
 
-import "hardhat/console.sol";
+pragma solidity ^0.8.8;
 
-contract Greeter {
-    string private greeting;
+import "./PriceConverter.sol";
 
-    constructor(string memory _greeting) {
-        console.log("Deploying a Greeter with greeting:", _greeting);
-        greeting = _greeting;
+contract FundMe{
+    using PriceConverter for uint256;
+
+
+    uint256 public minimumUsd=50*1e18;
+    
+    address[] public funders;
+
+    address public owner;
+    AggregatorV3Interface public priceFeed;
+    constructor(address priceFeedAddress){
+        owner=msg.sender;
+        priceFeed = AggregatorV3Interface(priceFeedAddress);
+
+                 }
+
+    mapping(address=>uint256)public addressToAmontFunded;
+
+    function fund() public payable{
+
+         require(msg.value.getConversionRate(priceFeedAddress)>minimumUsd,"Didn't have enough funds");
+         funders.push(msg.sender);
+         addressToAmontFunded[msg.sender]=msg.value;
+          }
+
+
+    function withdraw() public onlyOwner {
+        require(msg.sender == owner,"Sender is not owner!");
+            for(uint256 index=0; index < funders.length; index++)
+            {
+                address funder=funders[index];
+                addressToAmontFunded[funder]=0;
+
+
+            }
+
+            //RESETTING THE ARRAY
+            funders= new address[](0);
+            //actually withraw the funds
+
+            //tranfer
+        // payable(msg.sender).tranfer(address(this).balance);
+        //     //send
+        // bool successTransfer= payable(msg.sender).send(address(this).balance);
+        // require(successTransfer,"Send failed");
+        //     //call
+        (bool callSuccess, )=payable(msg.sender).call{value:address(this).balance}("");//("") we will define funtion inside this
+        //CallSuccess->true/false  dataReturned->returned from the call funtion which is called inside 
+        require(callSuccess,"Call failed");
     }
 
-    function greet() public view returns (string memory) {
-        return greeting;
+    modifier onlyOwner {
+        require(msg.sender!==owner ,"Sender is not the owner of the contract");
+        _;
     }
 
-    function setGreeting(string memory _greeting) public {
-        console.log("Changing greeting from '%s' to '%s'", greeting, _greeting);
-        greeting = _greeting;
+    receive() external payable{
+         fund();
     }
+
+    fallback external payable{
+        fund();
+    }
+
+       
+   
 }

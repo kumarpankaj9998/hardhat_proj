@@ -9,6 +9,13 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "hardhat": "^2.9.9"
+    "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers@^0.3.0-beta.13",
+    "ethers": "^5.5.4",
+    "hardhat": "^2.9.9",
+    "hardhat-deploy": "^0.11.11"
+  },
+  "dependencies": {
+    "@chainlink/contracts": "^0.4.1",
+    "hardhat-dependency-compiler": "^1.1.3"
   }
 }
