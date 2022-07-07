@@ -10,4 +10,6 @@ const networConfig = {
 };
 
 const developmentChain = ["hardhat", "localhost"];
-module.exports = { networConfig, developmentChain };
+const DECIMALS =0;
+const INITIAL_ANSWER=200000000000
+module.exports = { networConfig, developmentChain,DECIMALS, INITIAL_ANSWER};
